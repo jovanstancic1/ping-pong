@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igrica: Pong</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+    #game-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    canvas {
+        border: 1px solid #ccc;
+        background-color: #fff;
+    }
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Pocetne pozicije plocica
+        let player1Y = 150;
+        let player2Y = 150;
+
+        // Pocetne pozicije i brzina lopte
+        let ballX = 400;
+        let ballY = 200;
+        let ballSpeedX = 5;
+        let ballSpeedY = 5;
+
+        // Veličine elemenata igre
+        const paddleWidth = 10;
+        const paddleHeight = 100;
+        const ballSize = 10;
+
+        // Funkcija za crtanje pločica
+        function drawPaddles() {
+            ctx.fillStyle = '#000';
+            // Pločica igrača 1
+            ctx.fillRect(10, player1Y, paddleWidth, paddleHeight);
+            // Pločica igrača 2
+            ctx.fillRect(canvas.width - paddleWidth - 10, player2Y, paddleWidth, paddleHeight);
+        }
+
+        // Funkcija za crtanje lopte
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+            ctx.fillStyle = '#f00';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Glavna funkcija za crtanje igre
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPaddles();
+            drawBall();
+            moveBall();
+            checkCollision();
+        }
+
+        // Funkcija za kretanje lopte
+        function moveBall() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+        }
+
+        // Funkcija za detekciju sudara lopte sa pločicama i zidovima
+        function checkCollision() {
+            // Sudar sa desnom pločicom
+            if (ballX + ballSize >= canvas.width - paddleWidth - 10 &&
+                ballY >= player2Y &&
+                ballY <= player2Y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+            // Sudar sa levom pločicom
+            if (ballX - ballSize <= paddleWidth + 10 &&
+                ballY >= player1Y &&
+                ballY <= player1Y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+            // Sudar sa zidovima
+            if (ballY - ballSize <= 0 || ballY + ballSize >= canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
+            // Detekcija kada lopta prolazi pored pločica (gubitak poena)
+            if (ballX - ballSize <= 0 || ballX + ballSize >= canvas.width) {
+                resetBall();
+            }
+        }
+
+        // Funkcija za resetovanje pozicije lopte
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = -ballSpeedX;
+        }
+
+        // Funkcija za osluškivanje tastera
+        document.addEventListener('keydown', function(event) {
+            // Igrač 1 kontrole (W za gore, S za dole)
+            if (event.key === 'w' && player1Y > 0) {
+                player1Y -= 10;
+            } else if (event.key === 's' && player1Y < canvas.height - paddleHeight) {
+                player1Y += 10;
+            }
+            // Igrač 2 kontrole (strelice gore i dole)
+            if (event.key === 'ArrowUp' && player2Y > 0) {
+                player2Y -= 10;
+            } else if (event.key === 'ArrowDown' && player2Y < canvas.height - paddleHeight) {
+                player2Y += 10;
+            }
+        });
+
+        // Glavna petlja igre
+        setInterval(drawGame, 1000 / 60);
+    </script>
+</body>
+</html>
